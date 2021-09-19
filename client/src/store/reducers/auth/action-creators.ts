@@ -10,7 +10,8 @@ export const AuthActionCreators = {
             dispatch(AuthActionCreators.setIsLoading(true));
             setTimeout(() => {
                 dispatch(AuthActionCreators.setIsLoading(false));
-                dispatch(AuthActionCreators.setError("ошибка блять"));
+                // dispatch(AuthActionCreators.setError("ошибка блять"));
+                dispatch(AuthActionCreators.setIsAuth(true));
             }, 1000);
         } catch (e) {
             dispatch(AuthActionCreators.setError("Произошла ошибка при авторизации"));
