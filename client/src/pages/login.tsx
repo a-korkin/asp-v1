@@ -1,8 +1,9 @@
 import React, { FC } from "react"
+import LoginForm from "../components/login-form"
 
 const Login:FC = () => {
     return (
-        <h1>Login page</h1>
+        <LoginForm />
     );
 }
 

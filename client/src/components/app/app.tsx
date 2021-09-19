@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import AppRouter from "../app-router/app-router";
+import AppRouter from "../app-router";
+import "../ui/styles/semantic.min.css";
 
 const App: FC = () => {
     return (
