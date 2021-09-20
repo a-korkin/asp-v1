@@ -1,11 +1,8 @@
 import uuid
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.inspection import inspect
-from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
-ma = Marshmallow()
 
 uuid = uuid
 UUID = UUID
@@ -18,11 +15,3 @@ class Entity(db.Model):
     __mapper_args__ = {
         "polymorphic_identity": "cd_entities"
     }
-
-# class Serializer(object):
-#     def serialize(self):
-#         return {c: getattr(self, c) for c in inspect(self).attr.keys()}
-
-#     @staticmethod
-#     def serialize_list(l):
-#         return [m.serialize() for m in l]        
