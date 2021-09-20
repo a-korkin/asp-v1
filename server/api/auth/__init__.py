@@ -1,5 +1,6 @@
 import json
 from flask import Blueprint, jsonify, request
+from jose import jwt
 from .models import User
 from .schemas import user_schema, users_schema
 from .crud import *
@@ -57,7 +58,7 @@ def get_user(user_id):
     if user:
         return jsonify(user_schema.dump(user))
 
-    return jsonify({"message": "user not found"})
+    return jsonify({"message": "user not found"}), 404
 
 @auth.route("/users/<user_id>", methods=["DELETE"])
 def drop_user(user_id):
@@ -67,3 +68,12 @@ def drop_user(user_id):
         return jsonify({"message": "user deleted"})
 
     return jsonify({"message": "user not found"}), 404
+
+@auth.route("/login", methods=["POST"])
+def login():
+    username = request.get_json()
+
+    user = crud.fetch_user_by_name("travis")
+    token = jwt.encode(username, "secret", algorithm="HS256")
+
+    return jsonify({"token": token})
