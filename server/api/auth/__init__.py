@@ -19,26 +19,30 @@ def convert_input_to(class_):
 def index():
     return jsonify({"message": "test"})
 
-@auth.route("/users", methods=["POST"])    
-def create_user():
+@auth.route("/login", methods=["POST"])
+def login():
     data = request.get_json()
-    u = user_schema.dump(data)
-    print(u)
-    user = User(**json.loads(str(data).replace("'", "\"")))
-    print(user)
-    print(user.username)
+    username = data["username"]
+    pwd = data["password"]
 
-    return jsonify(u)
+    user = crud.fetch_user_by_name(username=username)
+    if user:
+        if user.verify_password(pwd):
+            return jsonify({"message": "success"})
+        else:
+            return jsonify({"message": "wrong password"})
 
-@auth.route("/us", methods=["POST"])    
+    return jsonify({"message": "login"})
+
+@auth.route("/users", methods=["POST"])    
 @convert_input_to(User)
-def cc_u(user: User):
+def create_user(user: User):
     print(user.username)
     print(user.password)
 
     data = request.get_json()
     u = user_schema.dump(data)
-    print(request.headers["x-access-token"])
+    # print(request.headers["x-access-token"])
     try:
         db_user = crud.create_user(user)
         print(db_user.id)
@@ -69,11 +73,3 @@ def drop_user(user_id):
 
     return jsonify({"message": "user not found"}), 404
 
-@auth.route("/login", methods=["POST"])
-def login():
-    username = request.get_json()
-
-    user = crud.fetch_user_by_name("travis")
-    token = jwt.encode(username, "secret", algorithm="HS256")
-
-    return jsonify({"token": token})

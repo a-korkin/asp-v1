@@ -1,5 +1,5 @@
-import json
 from db import db, Entity, uuid, UUID
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(Entity):
     __tablename__ = "cd_users"
@@ -11,4 +11,13 @@ class User(Entity):
     __mapper_args__ = {
         "polymorphic_identity": "cd_users"
     }
-    
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = generate_password_hash(password)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+    def verify_password(self, pwd):
+        return check_password_hash(self.password, pwd)        
