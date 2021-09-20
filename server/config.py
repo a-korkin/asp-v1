@@ -1,8 +1,21 @@
 import os
-from pydantic import BaseSettings, Field
+from re import DEBUG 
 
-class Settings(BaseSettings):
-    db_url: str
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
+class Config(object):
+    DEBUG = True
+    ENV = "development"
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DB_URL")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class DevelopmentConfig(Config):
+    pass
+
+class ProductionConfig(Config):
+    DEBUG = False
+    ENV = "production"
+
+config = {
+    "default": DevelopmentConfig,
+    "development": DevelopmentConfig,
+    "production": ProductionConfig
+}    
