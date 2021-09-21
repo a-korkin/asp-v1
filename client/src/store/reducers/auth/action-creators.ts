@@ -1,4 +1,5 @@
 import { AppDispatch } from "../..";
+import AuthService from "../../../services/auth-service";
 import { AuthActionEnum, SetErrorAction, SetIsAuthAction, SetIsLoadingAction } from "./types";
 
 export const AuthActionCreators = {
@@ -8,11 +9,11 @@ export const AuthActionCreators = {
     login: (username: string, password: string) => async (dispatch: AppDispatch) => {
         try {
             dispatch(AuthActionCreators.setIsLoading(true));
-            setTimeout(() => {
-                dispatch(AuthActionCreators.setIsLoading(false));
-                // dispatch(AuthActionCreators.setError("ошибка блять"));
-                dispatch(AuthActionCreators.setIsAuth(true));
-            }, 1000);
+            dispatch(AuthActionCreators.setIsLoading(false));
+
+            const response = await AuthService.login(username, password);
+            localStorage.setItem("token", response.data.accessToken);
+            dispatch(AuthActionCreators.setIsAuth(true));
         } catch (e) {
             dispatch(AuthActionCreators.setError("Произошла ошибка при авторизации"));
         }

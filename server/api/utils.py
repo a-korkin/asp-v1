@@ -8,16 +8,16 @@ def token_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         token = None
-        X_ACCESS_TOKEN = "x-access-token"
+        AUTHORIZATION = "Authorization"
 
-        if X_ACCESS_TOKEN in request.headers:
-            token = request.headers[X_ACCESS_TOKEN]
+        if AUTHORIZATION in request.headers:
+            token = request.headers[AUTHORIZATION].replace("Bearer ", "")
 
         if not token:
             return jsonify({"message": "token is missing"}), 401
 
         try:
-            SECRET_KEY = current_app.config["SECRET_KEY"] #os.environ.get("SECRET_KEY")
+            SECRET_KEY = current_app.config["SECRET_KEY"]
             data = jwt.decode(token, SECRET_KEY)
             current_user = fetch_user(data["user_id"])
         except:
@@ -31,7 +31,8 @@ def convert_input_to(class_):
     """декоратор для десериализации в объект запроса"""
     def wrap(f):
         def decorator(*args, **kwargs):
+            print(str(**request.get_json()))
             obj = class_(**request.get_json())
-            return f(obj)
+            return f(obj, *args, **kwargs)
         return decorator
     return wrap

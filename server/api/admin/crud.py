@@ -4,10 +4,13 @@ from .models import User
 
 def create_user(user: User):
     """создание пользователя"""
-    db.session.add(user)
-    db.session.commit()
-    db.session.refresh(user)
-    return user
+    try:
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
+        return user
+    except:
+        return None
 
 def fetch_all_users(offset: int = 0, limit: int = 10):
     """получение списка пользователей"""
