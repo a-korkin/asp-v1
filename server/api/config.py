@@ -1,5 +1,4 @@
 import os
-from re import DEBUG 
 
 class Config(object):
     DEBUG = True
