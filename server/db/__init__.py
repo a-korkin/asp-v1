@@ -4,9 +4,6 @@ from sqlalchemy.dialects.postgresql import UUID
 
 db = SQLAlchemy()
 
-uuid = uuid
-UUID = UUID
-
 class Entity(db.Model):
     __tablename__ = "cd_entities"
     __table_args__ = {"schema": "common", "comment": "сущности"}
