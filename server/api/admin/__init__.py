@@ -1,12 +1,35 @@
 import datetime
 from api.utils import token_required, convert_input_to
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, make_response
 from jose import jwt
 from .models import User
 from .schemas import user_schema, users_schema
 from .crud import *
 
 admin = Blueprint("admin", __name__)
+
+def refresh_tokens(user: User):
+    """обновление токена"""   
+    JWT_ACCESS_TOKEN_SECRET_KEY = current_app.config["JWT_ACCESS_TOKEN_SECRET_KEY"]
+    JWT_REFRESH_TOKEN_SECRET_KEY = current_app.config["JWT_REFRESH_TOKEN_SECRET_KEY"]
+    user_dict_access = {
+        "user_id": str(user.id), 
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15), 
+        "iat": datetime.datetime.utcnow()
+    }
+
+    user_dict_refresh = {
+        "user_id": str(user.id), 
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(days=2), 
+        "iat": datetime.datetime.utcnow()
+    }
+
+    access_token = jwt.encode(user_dict_access, JWT_ACCESS_TOKEN_SECRET_KEY, algorithm='HS256')
+    refresh_token = jwt.encode(user_dict_refresh, JWT_REFRESH_TOKEN_SECRET_KEY, algorithm='HS256')
+    resp = make_response(jsonify({"accessToken": f"Bearer {access_token}"}))
+    resp.set_cookie("refreshToken", value=refresh_token, httponly=True)
+    crud.update_user(user, refresh_token)
+    return resp
 
 @admin.route("/", methods=["GET"])
 def index():
@@ -22,19 +45,24 @@ def login():
     user = crud.fetch_user_by_name(username=username)
     if user:
         if user.verify_password(pwd):
-            secret_key = current_app.config["SECRET_KEY"]
-            user_dict = {
-                "user_id": str(user.id), 
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15), 
-                "iat": datetime.datetime.utcnow()
-            }
-
-            token = jwt.encode(user_dict, secret_key, algorithm='HS256')
-            return jsonify({"message": "success", "accessToken": f"Bearer {token}"}), 200
+            resp = refresh_tokens(user)
+            return resp, 200
         else:
             return jsonify({"message": "wrong password"}), 403
 
     return jsonify({"message": "wrong login or password"}), 403
+
+@admin.route("/logout", methods=["POST"]) 
+@token_required   
+def logout(current_user: User): 
+    crud.update_user(current_user, None)
+    return jsonify({"message": f"{current_user.username} is logged out"}), 200
+
+@admin.route("/refresh", methods=["POST"])    
+@token_required
+def refresh(current_user: User):
+    resp = refresh_tokens(current_user)
+    return resp, 200
 
 @admin.route("/users", methods=["POST"]) 
 @token_required

@@ -24,6 +24,11 @@ def fetch_user_by_name(username: str):
     """получение пользователя по логину"""
     return db.session.query(User).filter_by(username=username).first()
 
+def update_user(user: User, refresh_token: str):
+    """обновление пользователя"""
+    user.refresh_token = refresh_token
+    db.session.commit()
+
 def delete_user(user_id: UUID):
     """удаление пользователя"""
     user = fetch_user(user_id)    

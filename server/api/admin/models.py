@@ -10,6 +10,7 @@ class User(Entity):
     lastname = db.Column("c_lastname", db.String(500), nullable=False, comment="фамилия")
     firstname = db.Column("c_firstname", db.String(500), nullable=False, comment="имя")
     middlename = db.Column("c_middlename", db.String(500), comment="отчество")
+    refresh_token = db.Column("c_refresh_token", db.String(500), comment="рефреш токен")
 
     __mapper_args__ = {
         "polymorphic_identity": "cd_users"
