@@ -1,4 +1,5 @@
 import datetime
+import json
 from api.utils import token_required, convert_input_to
 from flask import Blueprint, jsonify, request, current_app, make_response
 from jose import jwt
@@ -27,13 +28,14 @@ def refresh_tokens(user: User):
     access_token = jwt.encode(user_dict_access, JWT_ACCESS_TOKEN_SECRET_KEY, algorithm='HS256')
     refresh_token = jwt.encode(user_dict_refresh, JWT_REFRESH_TOKEN_SECRET_KEY, algorithm='HS256')
     resp = make_response(jsonify({"accessToken": f"Bearer {access_token}"}))
-    resp.set_cookie("refreshToken", value=refresh_token, httponly=True)
+    # print(refresh_token)
+    resp.set_cookie("refreshToken", value=refresh_token) #, httponly=True)
     crud.update_user(user, refresh_token)
     return resp
 
 @admin.route("/", methods=["GET"])
 def index():
-    print(request.headers["Authorization"])
+    # print(current_app.config)
     return jsonify({"message": "index"})
 
 @admin.route("/login", methods=["POST"])
@@ -46,6 +48,9 @@ def login():
     if user:
         if user.verify_password(pwd):
             resp = refresh_tokens(user)
+            # resp.set_cookie("fuck", username)
+            # request.cookies.get('username')
+            # print(username)
             return resp, 200
         else:
             return jsonify({"message": "wrong password"}), 403
@@ -56,13 +61,22 @@ def login():
 @token_required   
 def logout(current_user: User): 
     crud.update_user(current_user, None)
-    return jsonify({"message": f"{current_user.username} is logged out"}), 200
-
-@admin.route("/refresh", methods=["POST"])    
-@token_required
-def refresh(current_user: User):
-    resp = refresh_tokens(current_user)
+    resp = make_response(jsonify({"message": f"{current_user.username} is logged out"}))
+    resp.set_cookie("refreshToken", "", expires=0)
     return resp, 200
+
+@admin.route("/refresh", methods=["GET"])    
+# @token_required
+def refresh():
+    refresh_token_cookie = request.cookies.get("refreshToken")
+    print(refresh_token_cookie)
+    return jsonify({"message": refresh_token_cookie})
+
+    # if refresh_token_cookie == current_user.refresh_token:
+    #     resp = refresh_tokens(current_user)
+    #     return resp, 200
+
+    # return jsonify({"message": "unauthorized"}), 401
 
 @admin.route("/users", methods=["POST"]) 
 @token_required

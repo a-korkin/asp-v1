@@ -9,6 +9,7 @@ def create_app(config_name="default"):
     """создание приложения"""
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    # app.config["APPLICATION_ROOT"] = "/api"
     db.init_app(app=app)
     Migrate(app=app, db=db)
     CORS(app=app, support_credentials=True)

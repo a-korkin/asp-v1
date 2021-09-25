@@ -1,9 +1,17 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
+import { useActions } from "../../hooks/use-actions";
 import { useTypedSelector } from "../../hooks/use-typed-selector";
 import { privateRoutes, publicRoutes, RouteNames } from "../../routes";
 
 const AppRouter: FC = () => {
+    // const { checkAuth } = useActions();
+    // useEffect(() => {
+    //     if (localStorage.getItem("token")) {
+    //         checkAuth();
+    //     }
+    // }, []);
+
     const {isAuth} = useTypedSelector(state => state.auth);
     return (
         isAuth

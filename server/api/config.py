@@ -7,6 +7,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_SECRET_KEY = os.environ.get("JWT_ACCESS_TOKEN_SECRET_KEY")
     JWT_REFRESH_TOKEN_SECRET_KEY = os.environ.get("JWT_REFRESH_TOKEN_SECRET_KEY")
+    # APPLICATION_ROOT = "/api"
 
 class DevelopmentConfig(Config):
     pass
