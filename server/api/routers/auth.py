@@ -2,34 +2,35 @@ import traceback
 from uuid import UUID
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from jose import jwt
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
 from api.config import settings
 from api.models.user import User
 from api.crud import crud_user
 from api.dependencies import get_db
-from passlib.context import CryptContext
 from api.schemas.user import UserSchema
+from api.utils import create_token, verify_password, get_password_hash, get_current_user
+from datetime import timedelta
 
-router = APIRouter()
+router = APIRouter()  
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def verify_password(pwd, hash):
-    return pwd_context.verify(pwd, hash)
-
-def get_password_hash(pwd):
-    return pwd_context.hash(pwd)    
-
-@router.get("/")
-async def index():
+@router.get("/token/{tok}")
+async def index(tok: str, db: Session = Depends(get_db)):
+    print(get_current_user(token=tok, secret_key=settings.JWT_ACCESS_TOKEN_SECRET_KEY, db=db))
     return {"message": "fucker"}
 
 @router.post("/login")    
-async def login(user: UserSchema):
-    access_token = jwt.encode({"user": user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, algorithm="HS256")
-    refresh_token = jwt.encode({"user": user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, algorithm="HS256")
+async def login(user: UserSchema, db: Session = Depends(get_db)):
+    db_user: User = crud_user.fetch_user_by_name(db, user.username)
+
+    if not db_user:
+        raise HTTPException(status_code=403, detail="access denied")
+    
+    if not verify_password(user.password, db_user.password):
+        raise HTTPException(status_code=403, detail="access denied")
+      
+    access_token = create_token({"user": user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=1))
+    refresh_token = create_token({"user": user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
     content = {"accessToken": access_token}
     response = JSONResponse(content=content)
     response.set_cookie(key="refreshToken", value=refresh_token, httponly=True)
@@ -41,6 +42,7 @@ async def create_user(user: UserSchema, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="user already exists")
 
+    user.password = get_password_hash(user.password)
     db_user = crud_user.create_user(db, user)
     return {"message": "user created"}
 
