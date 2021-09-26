@@ -1,6 +1,6 @@
-from api.db import Entity
+# import uuid
+from api.db import Entity, Column, String, UUID, uuid
 from sqlalchemy.sql.schema import ForeignKey
-from api.db import Column, String, UUID, uuid
 
 class User(Entity):
     __tablename__ = "cd_users"

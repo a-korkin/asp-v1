@@ -1,23 +1,12 @@
-import os
+from pydantic import BaseSettings
 
-class Config(object):
-    DEBUG = True
-    ENV = "development"
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DB_URL")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_ACCESS_TOKEN_SECRET_KEY = os.environ.get("JWT_ACCESS_TOKEN_SECRET_KEY")
-    JWT_REFRESH_TOKEN_SECRET_KEY = os.environ.get("JWT_REFRESH_TOKEN_SECRET_KEY")
-    # APPLICATION_ROOT = "/api"
+class Settings(BaseSettings):
+    DB_URL: str
+    JWT_ACCESS_TOKEN_SECRET_KEY: str
+    JWT_REFRESH_TOKEN_SECRET_KEY: str
 
-class DevelopmentConfig(Config):
-    pass
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
-class ProductionConfig(Config):
-    DEBUG = False
-    ENV = "production"
-
-config = {
-    "default": DevelopmentConfig,
-    "development": DevelopmentConfig,
-    "production": ProductionConfig
-}    
+settings = Settings()        

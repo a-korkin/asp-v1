@@ -1,20 +1,21 @@
-from flask import Flask 
-from flask_migrate import Migrate
-from .admin import admin as admin_blueprint
-from db import db
-from .config import config
-from flask_cors import CORS
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .routers import auth
 
-def create_app(config_name="default"):
-    """создание приложения"""
-    app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    # app.config["APPLICATION_ROOT"] = "/api"
-    db.init_app(app=app)
-    Migrate(app=app, db=db)
-    CORS(app=app, support_credentials=True)
+def create_app():
+    app = FastAPI()
+    app.include_router(auth.router)
 
-    # blueprints
-    app.register_blueprint(admin_blueprint)
+    origins = [
+        "http://localhost:3000"
+    ]
     
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["GET,POST,PUT,DELETE"],
+        allow_headers=["*"],
+    )
+
     return app
