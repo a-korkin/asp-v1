@@ -1,11 +1,22 @@
+from fastapi.param_functions import Depends
 from sqlalchemy.orm.session import Session
 from api.crud import crud_user
 from typing import Optional
 from fastapi.exceptions import HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from jose.constants import ALGORITHMS
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
+from api.config import settings
+from api.db import SessionLocal
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    except:
+        db.close()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -27,9 +38,11 @@ def create_token(data: dict, secret_key: str, expires_delta: Optional[timedelta]
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=ALGORITHMS.HS256)
     return encoded_jwt
 
-def get_current_user(token: str, secret_key: str, db: Session):   
-    credential_exception = HTTPException(status_code=401, detail="could not validate credentials")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")    
 
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):   
+    credential_exception = HTTPException(status_code=401, detail="could not validate credentials")
+    secret_key = settings.JWT_ACCESS_TOKEN_SECRET_KEY
     username: str
     try:
         payload = jwt.decode(token=token, key=secret_key, algorithms=ALGORITHMS.HS256)

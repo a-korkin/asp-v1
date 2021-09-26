@@ -7,12 +7,15 @@ from sqlalchemy.orm.session import Session
 from api.config import settings
 from api.models.user import User
 from api.crud import crud_user
-from api.dependencies import get_db
 from api.schemas.user import UserSchema
-from api.utils import create_token, verify_password, get_password_hash, get_current_user
+from api.utils import get_db, create_token, verify_password, get_password_hash, get_current_user
 from datetime import timedelta
 
 router = APIRouter()  
+
+@router.get("/secret")    
+async def secret(current_user: User = Depends(get_current_user)):
+    return {"m": current_user.username}
 
 @router.get("/token/{tok}")
 async def index(tok: str, db: Session = Depends(get_db)):
@@ -29,7 +32,7 @@ async def login(user: UserSchema, db: Session = Depends(get_db)):
     if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=403, detail="access denied")
       
-    access_token = create_token({"user": user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=1))
+    access_token = create_token({"user": user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=15))
     refresh_token = create_token({"user": user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
     content = {"accessToken": access_token}
     response = JSONResponse(content=content)
