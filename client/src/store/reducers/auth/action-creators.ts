@@ -30,11 +30,16 @@ export const AuthActionCreators = {
         dispatch(AuthActionCreators.setIsAuth(false));
         dispatch(AuthActionCreators.setUser({} as IUser));
     },
-    checkAuth: () => async (dispatch: AppDispatch) => {
+    checkAuth: (username: string) => async (dispatch: AppDispatch) => {
         try {
-            const response = await axios.post<AuthResponse>(`${API_URL}/refresh`);
-            localStorage.setItem("token", response.data.accessToken);
-            dispatch(AuthActionCreators.setIsAuth(true));
+            console.log("refresh start");
+            // , {username: username, password: ""}
+            await axios.post(`${API_URL}/test`, JSON.parse(JSON.stringify({username: "username", password: "password"})));
+            console.log("refresh end");
+
+            // const response = await axios.post<AuthResponse>(`${API_URL}/refresh`, {username: username, password: ""});
+            // localStorage.setItem("token", response.data.accessToken);
+            // dispatch(AuthActionCreators.setIsAuth(true));
         } catch (e) {
             console.log(e);
         }

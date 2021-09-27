@@ -15,7 +15,7 @@ from api.utils import get_db, create_token, verify_password, get_password_hash, 
 from datetime import timedelta
 
 router = APIRouter()  
-
+   
 @router.get("/secret")    
 async def secret(current_user: User = Depends(get_current_user)):
     return {"m": current_user.username}
@@ -55,9 +55,21 @@ async def logout():
     response.delete_cookie(key="refresh_token")
     return response
 
+@router.post("/test")
+async def test(user: UserSchema):
+    return {"test": "test"}
+
 @router.post("/refresh")    
-async def refresh(current_user: User = Depends(get_current_user), db: Session = Depends(get_db), refresh_token: Optional[str] = Cookie(None)):
+async def refresh(user: UserSchema, db: Session = Depends(get_db), refresh_token: Optional[str] = Cookie(None)):
     # try:
+    current_user = crud_user.fetch_user_by_name(db, username=user.username)
+
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="unauthorized")
+
+    print(refresh_token)
+    print(current_user.refresh_token)
+
     if refresh_token == current_user.refresh_token:
         access_token = create_token({"user": current_user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=15))
         refresh_token = create_token({"user": current_user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
