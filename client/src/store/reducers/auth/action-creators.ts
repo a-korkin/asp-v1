@@ -33,9 +33,12 @@ export const AuthActionCreators = {
     checkAuth: (username: string) => async (dispatch: AppDispatch) => {
         try {
             console.log("refresh start");
-            // , {username: username, password: ""}
-            await axios.post(`${API_URL}/test`, JSON.parse(JSON.stringify({username: "username", password: "password"})));
+            // await axios.post(`${API_URL}/test`, JSON.parse(JSON.stringify({username: "username", password: "password"})));
+            await axios.get(`${API_URL}/test`, {params: {username: username}});
             console.log("refresh end");
+
+
+
 
             // const response = await axios.post<AuthResponse>(`${API_URL}/refresh`, {username: username, password: ""});
             // localStorage.setItem("token", response.data.accessToken);

@@ -55,9 +55,9 @@ async def logout():
     response.delete_cookie(key="refresh_token")
     return response
 
-@router.post("/test")
-async def test(user: UserSchema):
-    return {"test": "test"}
+@router.get("/test/{username}")
+async def test(username: str):
+    return {"test": username}
 
 @router.post("/refresh")    
 async def refresh(user: UserSchema, db: Session = Depends(get_db), refresh_token: Optional[str] = Cookie(None)):
