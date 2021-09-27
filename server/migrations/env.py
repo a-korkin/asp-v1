@@ -14,7 +14,7 @@ config = context.config
 fileConfig(config.config_file_name)
 
 from api.config import settings
-config.set_main_option("sqlalchemy.url", settings.db_url)
+config.set_main_option("sqlalchemy.url", settings.DB_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

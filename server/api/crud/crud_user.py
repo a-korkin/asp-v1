@@ -20,6 +20,11 @@ def fetch_user(db: Session, user_id: uuid.UUID):
 def fetch_user_by_name(db: Session, username: str) -> User:
     return db.query(User).filter_by(username=username).first()
 
+def update_user(db: Session, user: User):    
+    db.commit()
+    db.refresh(user)
+    return user
+
 def drop_user(db: Session, user: User):
     db.delete(user)    
     db.commit()

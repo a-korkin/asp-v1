@@ -5,12 +5,12 @@ import { useTypedSelector } from "../../hooks/use-typed-selector";
 import { privateRoutes, publicRoutes, RouteNames } from "../../routes";
 
 const AppRouter: FC = () => {
-    // const { checkAuth } = useActions();
-    // useEffect(() => {
-    //     if (localStorage.getItem("token")) {
-    //         checkAuth();
-    //     }
-    // }, []);
+    const { checkAuth } = useActions();
+    useEffect(() => {
+        if (localStorage.getItem("token")) {
+            checkAuth();
+        }
+    }, []);
 
     const {isAuth} = useTypedSelector(state => state.auth);
     return (

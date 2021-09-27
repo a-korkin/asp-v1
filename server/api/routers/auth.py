@@ -1,7 +1,10 @@
+import json
 import traceback
+from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, HTTPException
-from fastapi.params import Depends
+from fastapi.openapi.models import Response
+from fastapi.params import Cookie, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
 from api.config import settings
@@ -34,9 +37,44 @@ async def login(user: UserSchema, db: Session = Depends(get_db)):
       
     access_token = create_token({"user": user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=15))
     refresh_token = create_token({"user": user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
-    content = {"accessToken": access_token}
+    
+    try:
+        db_user.refresh_token = refresh_token
+        crud_user.update_user(db, db_user)
+    except:
+        print(traceback.format_exc())
+    content = {"accessToken": access_token, "user": dict(user)}
     response = JSONResponse(content=content)
-    response.set_cookie(key="refreshToken", value=refresh_token, httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    return response
+
+@router.post("/logout")    
+async def logout():
+    content = {"message": "logged out"}
+    response = JSONResponse(content=content)
+    response.delete_cookie(key="refresh_token")
+    return response
+
+@router.post("/refresh")    
+async def refresh(current_user: User = Depends(get_current_user), db: Session = Depends(get_db), refresh_token: Optional[str] = Cookie(None)):
+    # try:
+    if refresh_token == current_user.refresh_token:
+        access_token = create_token({"user": current_user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=15))
+        refresh_token = create_token({"user": current_user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
+
+        current_user.refresh_token = refresh_token
+        crud_user.update_user(db, current_user)
+
+        user_dict = {"username": current_user.username, "password": current_user.password}
+        content = {"accessToken": access_token, "user": user_dict}
+        response = JSONResponse(content=content)
+        response.content = content
+        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    else:
+        raise HTTPException(status_code=401, detail="unauthorized")
+    # except:
+    #     print(traceback.format_exc())
+    #     HTTPException(status_code=403, detail="access denied")
     return response
 
 @router.post("/users", status_code=201)
