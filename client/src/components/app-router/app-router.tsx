@@ -9,6 +9,7 @@ const AppRouter: FC = () => {
     const { user } = useTypedSelector(state => state.auth);
     useEffect(() => {
         if (localStorage.getItem("token")) {
+            console.log(user.username);
             checkAuth(user.username);
         }
     }, []);

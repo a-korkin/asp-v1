@@ -34,7 +34,7 @@ export const AuthActionCreators = {
         try {
             console.log("refresh start");
             // await axios.post(`${API_URL}/test`, JSON.parse(JSON.stringify({username: "username", password: "password"})));
-            await axios.get(`${API_URL}/test`, {params: {username: username}});
+            await axios.get(`${API_URL}/test/${username}`);
             console.log("refresh end");
 
 
