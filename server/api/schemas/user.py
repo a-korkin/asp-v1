@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-class UserSchema(BaseModel):
+class UserDTO(BaseModel):
     username: str
-    password: str
     

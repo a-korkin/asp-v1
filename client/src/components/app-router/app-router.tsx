@@ -5,22 +5,23 @@ import { useTypedSelector } from "../../hooks/use-typed-selector";
 import { privateRoutes, publicRoutes, RouteNames } from "../../routes";
 
 const AppRouter: FC = () => {
-    const { checkAuth } = useActions();
-    const { user } = useTypedSelector(state => state.auth);
+    const { checkAuth, fetchUsers } = useActions();
     useEffect(() => {
         if (localStorage.getItem("token")) {
-            console.log(user.username);
-            checkAuth(user.username);
+            checkAuth();
+            fetchUsers();
         }
     }, []);
-
+    
     const {isAuth} = useTypedSelector(state => state.auth);
+    
     return (
         isAuth
         ?
         <Switch>
             {privateRoutes.map(route => 
-                <Route key={route.path} path={route.path} component={route.component} exact={route.exact} />)}
+                <Route key={route.path} path={route.path} component={route.component} exact={route.exact} />
+            )}
             <Redirect to={RouteNames.PRIVATE_PAGE} />
         </Switch>
         :

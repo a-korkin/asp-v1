@@ -2,6 +2,7 @@ import React from "react";
 import Login from "../pages/login";
 import PrivatePage from "../pages/private-page";
 import PublicPage from "../pages/public-page";
+import UserList from "../pages/user-list";
 
 export interface IRoute {
     path: string;
@@ -12,11 +13,13 @@ export interface IRoute {
 export enum RouteNames {
     LOGIN = "/login",
     PRIVATE_PAGE = "/private_page",
-    PUBLIC_PAGE = "/public_page"
+    PUBLIC_PAGE = "/public_page",
+    USER_LIST = "/users"
 }
 
 export const privateRoutes: IRoute[] = [
-    { path: RouteNames.PRIVATE_PAGE, component: PrivatePage, exact: true }
+    { path: RouteNames.PRIVATE_PAGE, component: PrivatePage, exact: true },
+    { path: RouteNames.USER_LIST, component: UserList, exact: true}
 ]
 
 export const publicRoutes: IRoute[] = [

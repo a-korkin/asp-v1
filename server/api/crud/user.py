@@ -1,9 +1,9 @@
 import uuid
 from sqlalchemy.orm.session import Session
 from api.models.user import User
-from api.schemas.user import UserSchema
+from api.schemas.auth import AuthInDTO
 
-def create_user(db: Session, user: UserSchema):
+def create_user(db: Session, user: AuthInDTO):
     db_user = User(
         username=user.username,
         password=user.password

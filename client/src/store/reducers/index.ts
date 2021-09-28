@@ -1,5 +1,7 @@
 import { authReducer } from "./auth";
+import { usersReducer } from "./users";
 
 export const reducers = {
-    auth: authReducer
+    auth: authReducer,
+    users: usersReducer
 }
