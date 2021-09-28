@@ -6,10 +6,9 @@ import { privateRoutes, publicRoutes, RouteNames } from "../../routes";
 
 const AppRouter: FC = () => {
     const { checkAuth } = useActions();
-    const { user } = useTypedSelector(state => state.auth);
     useEffect(() => {
         if (localStorage.getItem("token")) {
-            checkAuth(user.username);
+            checkAuth();
         }
     }, []);
 

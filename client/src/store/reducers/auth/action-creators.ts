@@ -30,21 +30,17 @@ export const AuthActionCreators = {
         dispatch(AuthActionCreators.setIsAuth(false));
         dispatch(AuthActionCreators.setUser({} as IUser));
     },
-    checkAuth: (username: string) => async (dispatch: AppDispatch) => {
+    checkAuth: () => async (dispatch: AppDispatch) => {
         try {
-            console.log("refresh start");
-            // await axios.post(`${API_URL}/test`, JSON.parse(JSON.stringify({username: "username", password: "password"})));
-            await axios.get(`${API_URL}/test`, {params: {username: username}});
-            console.log("refresh end");
-
-
-
-
-            // const response = await axios.post<AuthResponse>(`${API_URL}/refresh`, {username: username, password: ""});
-            // localStorage.setItem("token", response.data.accessToken);
-            // dispatch(AuthActionCreators.setIsAuth(true));
+            dispatch(AuthActionCreators.setIsLoading(true));
+            const response = await axios.get<AuthResponse>(`${API_URL}/refresh`, {withCredentials: true});
+            localStorage.setItem("token", response.data.accessToken);
+            dispatch(AuthActionCreators.setIsAuth(true));
+            dispatch(AuthActionCreators.setUser(response.data.user));
         } catch (e) {
-            console.log(e);
+            dispatch(AuthActionCreators.setError("Произошла ошибка при авторизации"));
+        } finally {
+            dispatch(AuthActionCreators.setIsLoading(false));
         }
     }
 }

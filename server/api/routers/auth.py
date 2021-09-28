@@ -11,7 +11,7 @@ from api.config import settings
 from api.models.user import User
 from api.crud import crud_user
 from api.schemas.user import UserSchema
-from api.utils import get_db, create_token, verify_password, get_password_hash, get_current_user
+from api.utils import get_db, create_token, verify_password, get_password_hash, get_current_user, check_refresh_token
 from datetime import timedelta
 
 router = APIRouter()  
@@ -55,39 +55,23 @@ async def logout():
     response.delete_cookie(key="refresh_token")
     return response
 
-@router.get("/test/{username}")
-async def test(username: str):
-    return {"test": username}
-
-@router.post("/refresh")    
-async def refresh(user: UserSchema, db: Session = Depends(get_db), refresh_token: Optional[str] = Cookie(None)):
-    # try:
-    current_user = crud_user.fetch_user_by_name(db, username=user.username)
-
-    if current_user is None:
-        raise HTTPException(status_code=401, detail="unauthorized")
-
-    print(refresh_token)
-    print(current_user.refresh_token)
-
-    if refresh_token == current_user.refresh_token:
-        access_token = create_token({"user": current_user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=15))
-        refresh_token = create_token({"user": current_user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
-
-        current_user.refresh_token = refresh_token
-        crud_user.update_user(db, current_user)
-
-        user_dict = {"username": current_user.username, "password": current_user.password}
-        content = {"accessToken": access_token, "user": user_dict}
+@router.get("/refresh")    
+async def refresh(refresh_token: Optional[str] = Cookie(None), db: Session = Depends(get_db)):
+    try:
+        user = check_refresh_token(token=refresh_token, db=db)
+        
+        access_token = create_token({"user": user.username}, settings.JWT_ACCESS_TOKEN_SECRET_KEY, timedelta(minutes=15))
+        _refresh_token = create_token({"user": user.username}, settings.JWT_REFRESH_TOKEN_SECRET_KEY, timedelta(days=10))
+        
+        user.refresh_token = _refresh_token
+        crud_user.update_user(db, user)
+        content = {"accessToken": access_token, "user": {"username": user.username, "password": user.password}}
         response = JSONResponse(content=content)
-        response.content = content
-        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
-    else:
-        raise HTTPException(status_code=401, detail="unauthorized")
-    # except:
-    #     print(traceback.format_exc())
-    #     HTTPException(status_code=403, detail="access denied")
-    return response
+        response.set_cookie(key="refresh_token", value=_refresh_token, httponly=True)
+        return response
+    except:
+        print(traceback.format_exc())
+
 
 @router.post("/users", status_code=201)
 async def create_user(user: UserSchema, db: Session = Depends(get_db)):
