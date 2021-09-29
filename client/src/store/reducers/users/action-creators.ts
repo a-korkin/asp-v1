@@ -8,7 +8,6 @@ export const UsersActionCreators = {
     fetchUsers: () => async (dispatch: AppDispatch) => {
         try {
             const response = await UserService.fetchUsers();
-            console.log(response.data);
             dispatch(UsersActionCreators.setUsers(response.data));
         } catch (e) {
             console.log(e);

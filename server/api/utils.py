@@ -1,6 +1,6 @@
 from fastapi.param_functions import Depends
 from sqlalchemy.orm.session import Session
-from api.crud import user as crud_user
+from api.services import user as user_service
 from typing import Optional
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -52,7 +52,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credential_exception
     
-    user = crud_user.fetch_user_by_name(db=db, username=username)
+    user = user_service.fetch_user_by_name(db=db, username=username)
     if user is None:
         raise credential_exception
     
@@ -68,7 +68,7 @@ def check_refresh_token(token: str, db: Session):
         if username is None:
             raise credential_exception
         
-        user = crud_user.fetch_user_by_name(db=db, username=username)
+        user = user_service.fetch_user_by_name(db=db, username=username)
         return user
 
     except JWTError:
