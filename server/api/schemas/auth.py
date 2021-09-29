@@ -2,14 +2,14 @@ from pydantic.fields import Field
 from api.schemas.user import UserBase
 from pydantic import BaseModel
 
-class AuthInDTO(BaseModel):
+class AuthIn(BaseModel):
     username: str
     password: str
 
     class Config:
         orm_mode = True
 
-class AuthOutDTO(BaseModel):
+class AuthOut(BaseModel):
     access_token: str
     user: UserBase
 

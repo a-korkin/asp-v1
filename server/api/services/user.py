@@ -1,9 +1,9 @@
 import uuid
 from sqlalchemy.orm.session import Session
 from api.models.user import User
-from api.schemas.auth import AuthInDTO
+from api.schemas.user import UserCreate
 
-def create_user(db: Session, user: AuthInDTO):
+def create_user(db: Session, user: UserCreate):
     db_user = User(
         username=user.username,
         password=user.password
@@ -13,6 +13,9 @@ def create_user(db: Session, user: AuthInDTO):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def fetch_users(db: Session, offset: int = 0, limit: int = 10):
+    return db.query(User).offset(offset).limit(limit).all()
 
 def fetch_user(db: Session, user_id: uuid.UUID):
     return db.query(User).filter_by(id=user_id).first()
