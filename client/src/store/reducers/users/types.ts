@@ -1,7 +1,10 @@
 import { IUser } from "../../../models/user";
 import { ICommonState } from "../common/types";
 
+// export interface IUserState extends ICommonState {
 export interface IUserState extends ICommonState {
+    isLoading: boolean;
+    error: string;
     users: IUser[]
 }
 
@@ -11,12 +14,12 @@ export enum UserActionsEnum {
     GET_USERS = "GET_USERS",
 }
 
-export interface GetUserAction {
+export interface GetUsersAction {
     type: UserActionsEnum.GET_USERS;
     payload: IUser[];
 }
 
-export interface SetLoadingAction {
+export interface SetIsLoadingAction {
     type: UserActionsEnum.SET_LOADING;
     payload: boolean;
 }
@@ -26,4 +29,4 @@ export interface SetErrorAction {
     payload: string;
 }
 
-export type UserAction = GetUserAction | SetLoadingAction | SetErrorAction;
+export type UserAction = GetUsersAction | SetIsLoadingAction | SetErrorAction;
